@@ -39,7 +39,7 @@ jobs:
 
       # 🔧 Step 2: Auto-fix & commit jika di branch 'development'
       - name: Auto-fix and commit (only on development)
-        if: github.ref == 'refs/heads/development'
+        if: github.ref == 'refs/heads/development' || github.head_ref == 'development'
         run: |
           ./vendor/bin/php-cs-fixer fix --verbose
           ./vendor/bin/phpcbf --standard=PSR12 app
