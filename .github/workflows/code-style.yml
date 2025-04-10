@@ -11,29 +11,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 🔁 Checkout source code
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # 🛠️ Setup PHP environment
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: mbstring, intl, pdo
 
+      # 📦 Install Composer dependencies
       - name: Install dependencies
         run: composer install --no-progress --prefer-dist
 
-      # 1️⃣ Run PHP-CS-Fixer (dry run)
-      - name: Check code style with PHP-CS-Fixer
-        run: vendor/bin/php-cs-fixer fix --dry-run --diff --verbose
-
-      # 2️⃣ Run PHPCS
+      # ✅ Step 1: Jalankan PHPCS (linting PSR-12)
       - name: Run PHP_CodeSniffer
-        run: vendor/bin/phpcs --standard=PSR12 app
+        run: |
+          if [ -d "app" ]; then
+            vendor/bin/phpcs --standard=PSR12 app
+          else
+            echo "No 'app' folder found, skipping PHPCS."
+          fi
 
-      # 3️⃣ Auto-fix & commit back if on development
+      # 🔧 Step 2: Auto-fix & commit jika di branch 'development'
       - name: Auto-fix and commit (only on development)
         if: github.ref == 'refs/heads/development'
         run: |
@@ -45,5 +49,10 @@ jobs:
             git config --global user.email 'github-actions[bot]@users.noreply.github.com'
             git add .
             git commit -m "chore: auto fix code style issues [ci skip]"
+            git pull --rebase --autostash
             git push origin development
           fi
+
+      # 🔍 Step 3: Check apakah masih ada pelanggaran (CI fail jika iya)
+      - name: Check code style with PHP-CS-Fixer
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff --verbose
