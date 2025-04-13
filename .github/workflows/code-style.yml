@@ -1,0 +1,46 @@
+name: Auto Fix Code Style
+
+on:
+  push:
+    branches: [main, development, feature/**]
+  pull_request:
+    branches: [main, development]
+
+jobs:
+  fix-style:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, pdo
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: Run PHP-CS-Fixer
+        run: vendor/bin/php-cs-fixer fix --verbose
+
+      - name: Run PHP_CodeSniffer Fixer
+        run: vendor/bin/phpcbf --standard=PSR12 app
+
+      - name: Commit fixed code back to branch
+        run: |
+          if [[ `git status --porcelain` ]]; then
+            echo "🔧 Code has been fixed. Committing back..."
+            git config --global user.name 'github-actions[bot]'
+            git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+            git add .
+            git commit -m "chore: auto-fix PSR-12 issues [ci skip]"
+            git pull --rebase --autostash
+            git push origin HEAD
+          else
+            echo "✅ No style issues found. Nothing to commit."
+          fi
