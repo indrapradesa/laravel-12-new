@@ -1,5 +1,4 @@
 ## 🔴 Template untuk PR ke `production`
-```md
 ## Deskripsi
 <!-- Jelaskan secara ringkas dan jelas mengenai perubahan yang dilakukan -->
 
@@ -26,4 +25,3 @@ Pilih salah satu yang sesuai:
 
 ## Screenshot (opsional)
 <!-- Jika ada perubahan UI, sertakan screenshot sebelum dan sesudah -->
-```
